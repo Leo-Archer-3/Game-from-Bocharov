@@ -18,7 +18,7 @@ tile_width = tile_height = 60
 
 
 hero_v_x = 15
-hero_v_y = -120
+hero_v_y = -90
 
 
 def load_level(filename):
@@ -117,43 +117,30 @@ class Hero(pygame.sprite.Sprite):
         super().__init__(player_group, all_sprites)
         self.image = player_image
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y - 4)
-        self.left_wall = HeroWalls(tile_width * pos_x, tile_height * pos_y)
-        self.right_wall = HeroWalls(tile_width * pos_x + 30, tile_height * pos_y)
+        self.gravity = 1
+        self.speed = 0
 
     def update(self):
-        if(not pygame.sprite.spritecollideany(self, floors_group)):
-            self.rect = self.rect.move(0, 1)
-            self.left_wall.update(0, 1)
-            self.right_wall.update(0, 1)
+        self.rect = self.rect.move(0, self.gravity)
+        if (pygame.sprite.spritecollideany(self, walls_group)):
+            self.rect = self.rect.move(0, -self.gravity)
+
 
     def run(self, x):
-        if(x < 0):
-            if (not pygame.sprite.spritecollideany(self.left_wall, walls_group)):
-                self.rect = self.rect.move(x, 0)
-                self.left_wall.update(x, 0)
-                self.right_wall.update(x, 0)
-        else:
-            if (not pygame.sprite.spritecollideany(self.right_wall, walls_group)):
-                self.rect = self.rect.move(x, 0)
-                self.left_wall.update(x, 0)
-                self.right_wall.update(x, 0)
+        self.rect = self.rect.move(x, 0)
+        if (pygame.sprite.spritecollideany(self, walls_group)):
+            self.rect = self.rect.move(-x, 0)
 
     def jump(self, y):
-        if (pygame.sprite.spritecollideany(self, floors_group)):
-            self.rect = self.rect.move(0, y)
-            self.left_wall.update(0, y)
-            self.right_wall.update(0, y)
+        self.rect = self.rect.move(0, self.gravity)
+        if (pygame.sprite.spritecollideany(self, walls_group)):
+            self.rect = self.rect.move(0, y * self.gravity)
+            if (pygame.sprite.spritecollideany(self, walls_group)):
+                self.rect = self.rect.move(0, y * -self.gravity)
+        self.rect = self.rect.move(0, -self.gravity)
 
 
-class HeroWalls(pygame.sprite.Sprite):
-    def __init__(self, x1,  y1):
-        super().__init__(all_sprites)
-        self.add(hero_walls_group)
-        self.image = pygame.Surface([1, 40])
-        self.rect = pygame.Rect(x1, y1, 1, 40)
 
-    def update(self, x, y):
-        self.rect = self.rect.move(x, y)
 
 
 # Класс камеры
@@ -178,13 +165,12 @@ class Camera:
 start_screen()
 
 # Загрузка изображений
-tile_images = {'wall': load_image('brick2.jpg'), 'empty': load_image('sky.jpg')}
+tile_images = {'wall': load_image('brick2.jpg')}
 player_image = load_image('mar1.png', -1)
 
 # Генерация групп спрайтов и самих спрайтов
 all_sprites = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
-hero_walls_group = pygame.sprite.Group()
 walls_group = pygame.sprite.Group()
 floors_group = pygame.sprite.Group()
 
@@ -225,7 +211,6 @@ while(run):
     player_group.draw(screen)
 
     all_sprites.draw(screen)
-    hero_walls_group.draw(screen)
     pygame.display.flip()
 
 
