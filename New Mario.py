@@ -65,8 +65,8 @@ def generate_level(level):
             elif(level[y][x] == '*'):
                 Monster(x, y)
             elif(level[y][x] == '_'):
-                Plate(tile_width * x, tile_height * (y + 1) - 3)
-                Plate(tile_width * x + tile_width // 2, tile_height * (y + 1) - 3)
+                Plate(tile_width * x, tile_height * (y + 1) - 6)
+                Plate(tile_width * x + tile_width // 2, tile_height * (y + 1) - 6)
             elif (level[y][x] == '-'):
                 Plate(tile_width * x, tile_height * y)
                 Plate(tile_width * x + tile_width // 2, tile_height * y)
@@ -237,8 +237,8 @@ class Plate(pygame.sprite.Sprite):
     def __init__(self, x,  y):
         super().__init__(all_sprites)
         self.add(plates_group)
-        self.image = pygame.Surface([tile_width // 2 - 2, 2])
-        self.rect = pygame.Rect(x, y, 2, tile_width // 2 - 2)
+        self.image = pygame.Surface([tile_width // 2 - 2, 5])
+        self.rect = pygame.Rect(x, y, 2, tile_width // 2 - 8)
 
 
 # Класс камеры
