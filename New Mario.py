@@ -8,7 +8,8 @@ size = width, height = 700, 500
 
 pygame.display.set_caption('New Mario')
 pygame.key.set_repeat(200, 300)
-FPS = 50
+FPS = 70
+#FPS = 5
 WIDTH = 1000
 HEIGHT = 500
 screen = pygame.display.set_mode(size)
@@ -18,7 +19,7 @@ clock = pygame.time.Clock()
 tile_width = tile_height = 60
 
 # Скорость игрока
-hero_v_x = 15
+hero_v_x = 8
 hero_v_y = -90
 
 # Скорость и кол-во сосулек
@@ -162,13 +163,14 @@ class Hero(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y - 4)
 
         self.gravity = 1
-        self.speed = 2
+        self.speed = 3
 
     def update(self):
         if(pygame.sprite.spritecollideany(self, plates_group)):
             self.gravity *= -1
-            self.speed *= -1
-        try_move(self, walls_group, 0, self.speed)
+            #self.speed *= -1
+            self.rect = self.rect.move(0, self.gravity * 10)
+        try_move(self, walls_group, 0, self.speed * self.gravity)
 
     def run(self, x):
         try_move(self, walls_group, x, 0)
@@ -183,6 +185,7 @@ class Hero(pygame.sprite.Sprite):
         self.rect = self.rect.move(0, self.gravity)
         if (pygame.sprite.spritecollideany(self, walls_group)):
             try_move(self, walls_group, 0, y * self.gravity)
+        self.rect = self.rect.move(0, -self.gravity)
 
     def shoot(self):
         Icicle(self.rect.left + 10, self.rect.top + 25, self.direction_right)
@@ -238,7 +241,10 @@ class Plate(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.add(plates_group)
         self.image = pygame.Surface([tile_width // 2 - 2, 5])
+        self.rect = pygame.Rect(x, y, 2, 5) #tile_width // 2 - 8
+
         self.rect = pygame.Rect(x, y, 2, tile_width // 2 - 8)
+
 
 
 # Класс камеры
@@ -314,27 +320,25 @@ while(level <= max_level):
     icicles = 10
 
     while(not death and not win):
-        # Камера
-        camera.update(player)
-        for sprite in all_sprites:
-            camera.apply(sprite)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            key = pygame.key.get_pressed()
-            if key[pygame.K_w]:
-                player.jump(hero_v_y)
-            if key[pygame.K_a]:
-                player.run(-hero_v_x)
-            if key[pygame.K_d]:
-                player.run(hero_v_x)
-            if key[pygame.K_f]:
-                if(fire > 10):
-                    if(icicles > 0):
-                        player.shoot()
-                        icicles -= 1
-                        fire = 0
+
+        key = pygame.key.get_pressed()
+
+        if key[pygame.K_a]:
+            player.run(-hero_v_x)
+        if key[pygame.K_d]:
+            player.run(hero_v_x)
+        if key[pygame.K_w]:
+            player.jump(hero_v_y)
+        if key[pygame.K_f]:
+            if(fire > 10):
+                if(icicles > 0):
+                    player.shoot()
+                    icicles -= 1
+                    fire = 0
         fire += 1
         # проверка на столкновение игрока с монстром
         if(pygame.sprite.spritecollideany(player, monsters_group)):
@@ -351,24 +355,32 @@ while(level <= max_level):
             money += 1
             total_money += 1
 
-        if(timer < 15):
-            timer += 1
-        else:
-            timer = 0
-            player.update()
-            icicle_group.update()
-            monsters_group.update()
-        golden_group.update()
+        #if(timer < 15):
+        #    timer += 1
+        #else:
+        #timer = 0
+        player.update()
+        icicle_group.update()
+        monsters_group.update()
+        #golden_group.update()
+
+        # Камера
+        camera.update(player)
+        for sprite in all_sprites:
+            camera.apply(sprite)
+
         screen.fill((65, 105, 225))
-
-
 
         all_sprites.draw(screen)
         text1 = font.render('Монет собрано ' + str(money) + ' из ' + str(goldens_total), True, (255, 215, 0))
         text2 = font.render('Сосулек осталось' + str(icicles), True, (64, 224, 208))
         screen.blit(text1, (350, 70))
         screen.blit(text2, (350, 100))
+
+
+
         pygame.display.flip()
+        clock.tick(FPS)
 
 
     # если ты умер или прошёл уровень
