@@ -333,7 +333,7 @@ while(level <= max_level):
             player.run(hero_v_x)
         if key[pygame.K_w]:
             player.jump(hero_v_y)
-        if key[pygame.K_f]:
+        if key[pygame.K_s]:
             if(fire > 10):
                 if(icicles > 0):
                     player.shoot()
